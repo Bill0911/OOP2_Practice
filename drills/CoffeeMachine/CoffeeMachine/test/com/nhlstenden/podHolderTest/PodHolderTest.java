@@ -1,4 +1,5 @@
 package com.nhlstenden.podHolderTest;
+import com.nhlstenden.appliance.podHolder.CoffeeType;
 import com.nhlstenden.appliance.podHolder.NoMorePodException;
 import com.nhlstenden.appliance.podHolder.PodHolder;
 import com.nhlstenden.appliance.podHolder.PodHolderEmptyException;
@@ -33,7 +34,7 @@ public class PodHolderTest
         holder.addCoffeePod(mediumCappuccino);
 
         assertEquals(strongCappuccino, holder.getNextStrongCappuccino()); // get one pod
-        assertThrows(NoMorePodException.class, () -> holder.getNextItem(PodHolder.CoffeeType.STRONG_CAPPUCCINO));
+        assertThrows(NoMorePodException.class, () -> holder.getNextItem(CoffeeType.STRONG_CAPPUCCINO));
     }
 
 

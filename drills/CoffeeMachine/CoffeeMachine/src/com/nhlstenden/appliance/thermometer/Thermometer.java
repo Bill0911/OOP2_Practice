@@ -6,8 +6,8 @@ public class Thermometer
 
     public String getResult(Measurable measurable)
     {
-        ThermoResult result = new ThermoResult(measurable.measureTemperature());
+        ThermoResult result = new ThermoResult(measurable.getTemperature());
 
-        return "I measured a temperature of " + measurable.measureTemperature() + "Celsius";
+        return "I measured a temperature of " + measurable.getTemperature() + "Celsius";
     }
 }

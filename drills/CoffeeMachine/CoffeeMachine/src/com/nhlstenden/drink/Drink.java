@@ -19,7 +19,7 @@ public abstract class Drink implements Measurable
     }
 
     @Override
-    public int measureTemperature()
+    public int getTemperature ()
     {
         return (int) this.currentTemperature;
     }

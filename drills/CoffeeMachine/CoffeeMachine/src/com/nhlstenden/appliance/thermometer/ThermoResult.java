@@ -11,17 +11,18 @@ public class ThermoResult
 
     public TemperatureClassification getTemperatureLevel()
     {
-        if (temperature < 10)
+        if (this.temperature < 10)
         {
             return TemperatureClassification.COLD;
         }
-
-        if (temperature > 10 && temperature < 50)
+        else if (this.temperature < 50)
         {
             return TemperatureClassification.MEDIUM;
         }
-
-        return TemperatureClassification.HOT;
+        else
+        {
+            return TemperatureClassification.HOT;
+        }
     }
 
     public void setTemperature (int temperature)

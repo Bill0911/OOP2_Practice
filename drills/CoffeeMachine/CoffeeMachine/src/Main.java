@@ -48,7 +48,7 @@ public class Main
 
             thermometer.getResult(mediumEspresso);
             machine.setTemperature(80);
-            thermometer.getResult(mediumEspresso);
+            System.out.print(thermometer.getResult(mediumEspresso));
 
 
         }

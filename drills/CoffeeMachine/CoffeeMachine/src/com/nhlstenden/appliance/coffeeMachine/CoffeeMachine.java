@@ -16,17 +16,12 @@ public class CoffeeMachine extends TimerTask implements Measurable
 
     public CoffeeMachine ()
     {
-        this.temperature = 0;
+        this.setTemperature(60);
         this.coffeePods = new ArrayList<>();
     }
 
-    public int getTemperature ()
-    {
-        return temperature;
-    }
-
     @Override
-    public int measureTemperature()
+    public int getTemperature ()
     {
         return this.temperature;
     }
@@ -69,14 +64,14 @@ public class CoffeeMachine extends TimerTask implements Measurable
 
     public void turnOn(int brewingTemperature)
     {
-        this.temperature = brewingTemperature;
+        this.setTemperature(brewingTemperature);
         this.timer = new Timer();
         this.timer.schedule(this,0, 10000);
     }
 
     public void turnOff()
     {
-        this.temperature = 0;
+        this.setTemperature(60);
         this.timer.cancel();
         this.timer = null;
     }
@@ -89,4 +84,13 @@ public class CoffeeMachine extends TimerTask implements Measurable
             pod.startMakingCoffee(10, this.temperature);
         }
     }
+
+    /*
+    In Coffeemachine, use the setter in the constructor, now it can be 0 and the setter limits it between 60 and 95.
+    Magic numbers eg. 6
+    In PodHolder, extract the enum to a different class.
+    In getNextItem, you have a switch case, I think that is not necessary. Code in every case is the same. This can be programmed more efficient.
+    In Measurable I would rename the method to getTemperature.
+    In temperatureClassification, if I have a drink of exactly 10 it would be HOT.
+     */
 }

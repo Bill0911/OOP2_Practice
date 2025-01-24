@@ -17,18 +17,6 @@ import java.util.List;
 
 public class PodHolder implements Measurable
 {
-    public enum CoffeeType
-    {
-        MILD_ESPRESSO,
-        MEDIUM_ESPRESSO,
-        STRONG_ESPRESSO,
-        MILD_CAPPUCCINO,
-        MEDIUM_CAPPUCCINO,
-        STRONG_CAPPUCCINO,
-        MILD_LATTE,
-        MEDIUM_LATTE,
-        STRONG_LATTE
-    }
     private List<CoffeePod> coffeePods;
     private int temperature;
     private static PodHolder instance;
@@ -49,13 +37,8 @@ public class PodHolder implements Measurable
         this.coffeePods = coffeePods;
     }
 
-    public int getTemperature ()
-    {
-        return temperature;
-    }
-
     @Override
-    public int measureTemperature()
+    public int getTemperature ()
     {
         return this.temperature;
     }
@@ -80,7 +63,7 @@ public class PodHolder implements Measurable
         this.coffeePods.add(pod);
     }
 
-    public CoffeePod getNextItem(CoffeeType type) throws NoMorePodException, PodHolderEmptyException
+    private CoffeePod getNextItem(CoffeeType type) throws NoMorePodException, PodHolderEmptyException
     {
         if (this.coffeePods.isEmpty())
         {
@@ -90,67 +73,13 @@ public class PodHolder implements Measurable
         for (int i = 0; i < this.coffeePods.size(); i++)
         {
             CoffeePod pod = this.coffeePods.get(i);
-            switch (type)
+            if (pod.getCoffeeType().equals(type))
             {
-                case MILD_LATTE:
-                    if (pod instanceof MildLatte)
-                    {
-                        return this.coffeePods.remove(i);
-                    }
-                    break;
-                case MEDIUM_LATTE:
-                    if (pod instanceof MediumLatte)
-                    {
-                        return this.coffeePods.remove(i);
-                    }
-                    break;
-                case STRONG_LATTE:
-                    if (pod instanceof StrongLatte)
-                    {
-                        return this.coffeePods.remove(i);
-                    }
-                    break;
-                case MILD_ESPRESSO:
-                    if (pod instanceof MildEspresso)
-                    {
-                        return this.coffeePods.remove(i);
-                    }
-                    break;
-                case MEDIUM_ESPRESSO:
-                    if (pod instanceof MediumEspresso)
-                    {
-                        return this.coffeePods.remove(i);
-                    }
-                    break;
-                case STRONG_ESPRESSO:
-                    if (pod instanceof StrongEspresso)
-                    {
-                        return this.coffeePods.remove(i);
-                    }
-                    break;
-                case MILD_CAPPUCCINO:
-                    if (pod instanceof MildCappuccino)
-                    {
-                        return this.coffeePods.remove(i);
-                    }
-                    break;
-                case MEDIUM_CAPPUCCINO:
-                    if (pod instanceof MediumCappuccino)
-                    {
-                        return this.coffeePods.remove(i);
-                    }
-                    break;
-                case STRONG_CAPPUCCINO:
-                    if (pod instanceof StrongCappuccino)
-                    {
-                        return this.coffeePods.remove(i);
-                    }
-                    break;
-                default:
-                    break;
+                return this.coffeePods.remove(i);
             }
         }
-        throw new NoMorePodException("Hell no we run out of " + type.name());
+
+        throw new NoMorePodException("Hell no, no more" + type.name());
     }
 
     public MildCappuccino getNextMildCappuccino()
