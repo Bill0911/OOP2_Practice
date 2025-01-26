@@ -13,7 +13,6 @@ public class SmartBBQ implements Measurable
     private static final int INTERVAL_MS = 1000;
     private static final int GRILL_CAPACITY = 10;
 
-
     private Timer preheatTimer;
     private Timer grillTimer;
     private int currentTemperature;
@@ -25,9 +24,11 @@ public class SmartBBQ implements Measurable
         this.foods = new ArrayList<>();
     }
 
-    public void turnOn(int targetTemperature) {
-        this.targetTemperature = targetTemperature;
-        this.preHeat();
+    public void addFood(Food food) {
+        if (this.foods.size() >= GRILL_CAPACITY) {
+            throw new IllegalArgumentException("The grill is full");
+        }
+        this.foods.add(food);
     }
 
     @Override
@@ -76,28 +77,6 @@ public class SmartBBQ implements Measurable
         }
     }
 
-    private void preHeat() {
-        this.preheatTimer = new Timer();
-        preheatTimer.scheduleAtFixedRate(new PreHeatTask(), 0, INTERVAL_MS);
-    }
-
-    public void addFood(Food food) {
-        if (this.foods.size() >= GRILL_CAPACITY) {
-            throw new IllegalArgumentException("The grill is full");
-        }
-        this.foods.add(food);
-    }
-
-    public void startGrillSession(int temperature, int timeInSeconds) {
-        if (this.foods.isEmpty()) {
-            log.info("No food items to grill.");
-            return;
-        }
-
-        this.grillTimer = new Timer();
-        this.grillTimer.scheduleAtFixedRate(new GrillTask(temperature, timeInSeconds), 0, INTERVAL_MS);
-    }
-
     private class GrillTask extends TimerTask {
         private int temperature;
         private int timeInSeconds;
@@ -132,6 +111,26 @@ public class SmartBBQ implements Measurable
                 }
             }
         }
+    }
+
+    public void turnOn(int targetTemperature) {
+        this.targetTemperature = targetTemperature;
+        this.preHeat();
+    }
+
+    private void preHeat() {
+        this.preheatTimer = new Timer();
+        preheatTimer.scheduleAtFixedRate(new PreHeatTask(), 0, INTERVAL_MS);
+    }
+
+    public void startGrillSession(int temperature, int timeInSeconds) {
+        if (this.foods.isEmpty()) {
+            log.info("No food items to grill.");
+            return;
+        }
+
+        this.grillTimer = new Timer();
+        this.grillTimer.scheduleAtFixedRate(new GrillTask(temperature, timeInSeconds), 0, INTERVAL_MS);
     }
 
     public void turnOff() {
