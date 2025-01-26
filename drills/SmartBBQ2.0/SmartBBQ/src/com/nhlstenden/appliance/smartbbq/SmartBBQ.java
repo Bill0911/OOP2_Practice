@@ -21,7 +21,7 @@ public class SmartBBQ implements Measurable
     private List<Food> foods;
 
     public SmartBBQ() {
-        this.currentTemperature = 0; // Assuming starting temperature is 0°C
+        this.currentTemperature = 0;
         this.foods = new ArrayList<>();
     }
 
