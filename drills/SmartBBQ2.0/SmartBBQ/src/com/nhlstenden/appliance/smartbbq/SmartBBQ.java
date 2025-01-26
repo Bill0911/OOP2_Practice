@@ -94,8 +94,6 @@ public class SmartBBQ implements Measurable
             return;
         }
 
-        this.turnOn(temperature);
-
         this.grillTimer = new Timer();
         this.grillTimer.scheduleAtFixedRate(new GrillTask(temperature, timeInSeconds), 0, INTERVAL_MS);
     }

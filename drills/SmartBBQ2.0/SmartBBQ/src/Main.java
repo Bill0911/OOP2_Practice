@@ -17,8 +17,8 @@ public class Main
         grill.addFood(pepper);
         grill.addFood(corn);
 
-        grill.turnOn(50);
-        //grill.startGrillSession(130, 1300);
+        //grill.turnOn(50);
+        grill.startGrillSession(130, 1300);
         System.out.println(pepper.getCurrentTanningPercentage());
     }
 }
