@@ -4,17 +4,22 @@ import com.nhlstenden.appliance.thermometer.Measurable;
 import com.nhlstenden.food.Food;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class SmartBBQ implements Measurable
 {
     private static final Logger log = Logger.getLogger(SmartBBQ.class.getName());
+    private ScheduledExecutorService scheduler;
+    private ScheduledExecutorService grillScheduler;
     private static final int TEMPERATURE_INCREMENT = 5;
     private static final int INTERVAL_MS = 1000;
     private static final int GRILL_CAPACITY = 10;
 
-    private Timer preheatTimer;
-    private Timer grillTimer;
+
     private int currentTemperature;
     private int targetTemperature;
     private List<Food> foods;
@@ -62,32 +67,37 @@ public class SmartBBQ implements Measurable
         this.foods = foods;
     }
 
-    private class PreHeatTask extends TimerTask {
-        @Override
-        public void run() {
-            synchronized (SmartBBQ.this) {
-                if (currentTemperature >= targetTemperature) {
-                    preheatTimer.cancel();
-                    log.info("SmartBBQ™ is preheated to " + targetTemperature + "°C. Ready for use!");
-                } else {
-                    currentTemperature += TEMPERATURE_INCREMENT;
-                    log.info("Current temperature: " + currentTemperature + "°C");
-                }
-            }
-        }
+    public void turnOn(int targetTemperature) {
+        this.targetTemperature = targetTemperature;
+        this.scheduler = Executors.newScheduledThreadPool(1);
+        this.preHeat();
     }
 
-    private class GrillTask extends TimerTask {
-        private int temperature;
-        private int timeInSeconds;
+    private void preHeat() {
+        CompletableFuture.runAsync(() -> {
+            scheduler.scheduleAtFixedRate(() -> {
+                synchronized (SmartBBQ.this) {
+                    log.info("Preheating... Current temperature: " + currentTemperature + "°C, Target temperature: " + targetTemperature + "°C");
+                    if (currentTemperature >= targetTemperature) {
+                        scheduler.shutdown();
+                        log.info("SmartBBQ™ is preheated to " + targetTemperature + "°C. Ready for use!");
+                    } else {
+                        currentTemperature += TEMPERATURE_INCREMENT;
+                        log.info("Current temperature: " + currentTemperature + "°C");
+                    }
+                }
+            }, 0, 1, TimeUnit.SECONDS);
+        });
+    }
 
-        public GrillTask(int temperature, int timeInSeconds) {
-            this.temperature = temperature;
-            this.timeInSeconds = timeInSeconds;
+    public void startGrillSession(int temperature, int timeInSeconds) {
+        if (this.foods.isEmpty()) {
+            log.info("No food items to grill.");
+            return;
         }
 
-        @Override
-        public void run() {
+        this.grillScheduler = Executors.newScheduledThreadPool(1);
+        this.grillScheduler.scheduleAtFixedRate(() -> {
             synchronized (SmartBBQ.this) {
                 boolean allFoodCooked = true;
                 Iterator<Food> iterator = foods.iterator();
@@ -105,43 +115,24 @@ public class SmartBBQ implements Measurable
                 logCurrentTanningPercentages();
 
                 if (allFoodCooked) {
-                    grillTimer.cancel();
+                    grillScheduler.shutdown();
                     log.info("All food items are fully cooked. Grilling session complete.");
                     turnOff();
                 }
             }
-        }
-    }
-
-    public void turnOn(int targetTemperature) {
-        this.targetTemperature = targetTemperature;
-        this.preHeat();
-    }
-
-    private void preHeat() {
-        this.preheatTimer = new Timer();
-        preheatTimer.scheduleAtFixedRate(new PreHeatTask(), 0, INTERVAL_MS);
-    }
-
-    public void startGrillSession(int temperature, int timeInSeconds) {
-        if (this.foods.isEmpty()) {
-            log.info("No food items to grill.");
-            return;
-        }
-
-        this.grillTimer = new Timer();
-        this.grillTimer.scheduleAtFixedRate(new GrillTask(temperature, timeInSeconds), 0, INTERVAL_MS);
+        }, 0, INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
 
     public void turnOff() {
         this.currentTemperature = 0;
-        if (this.preheatTimer != null) {
-            this.preheatTimer.cancel();
-            this.preheatTimer = null;
+
+        if (this.scheduler != null) {
+            this.scheduler.shutdown();
+            this.scheduler = null;
         }
-        if (this.grillTimer != null) {
-            this.grillTimer.cancel();
-            this.grillTimer = null;
+        if (this.grillScheduler != null) {
+            this.grillScheduler.shutdown();
+            this.grillScheduler = null;
         }
         log.info("SmartBBQ™ is turned off.");
     }
