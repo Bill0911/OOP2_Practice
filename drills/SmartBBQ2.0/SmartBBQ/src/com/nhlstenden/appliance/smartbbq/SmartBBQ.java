@@ -30,7 +30,8 @@ public class SmartBBQ implements Measurable
     }
 
     public void addFood(Food food) {
-        if (this.foods.size() >= GRILL_CAPACITY) {
+        if (this.foods.size() >= GRILL_CAPACITY)
+        {
             throw new IllegalArgumentException("The grill is full");
         }
         this.foods.add(food);
@@ -67,21 +68,27 @@ public class SmartBBQ implements Measurable
         this.foods = foods;
     }
 
-    public void turnOn(int targetTemperature) {
+    public void turnOn(int targetTemperature)
+    {
         this.targetTemperature = targetTemperature;
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.preHeat();
     }
 
-    private void preHeat() {
+    private void preHeat()
+    {
         CompletableFuture.runAsync(() -> {
-            scheduler.scheduleAtFixedRate(() -> {
+            scheduler.scheduleAtFixedRate(() ->
+            {
                 synchronized (SmartBBQ.this) {
                     log.info("Preheating... Current temperature: " + currentTemperature + "°C, Target temperature: " + targetTemperature + "°C");
-                    if (currentTemperature >= targetTemperature) {
+                    if (currentTemperature >= targetTemperature)
+                    {
                         scheduler.shutdown();
                         log.info("SmartBBQ™ is preheated to " + targetTemperature + "°C. Ready for use!");
-                    } else {
+                    }
+                    else
+                    {
                         currentTemperature += TEMPERATURE_INCREMENT;
                         log.info("Current temperature: " + currentTemperature + "°C");
                     }
@@ -90,23 +97,30 @@ public class SmartBBQ implements Measurable
         });
     }
 
-    public void startGrillSession(int temperature, int timeInSeconds) {
-        if (this.foods.isEmpty()) {
+    public void startGrillSession(int temperature, int timeInSeconds)
+    {
+        if (this.foods.isEmpty())
+        {
             log.info("No food items to grill.");
             return;
         }
 
         this.grillScheduler = Executors.newScheduledThreadPool(1);
         this.grillScheduler.scheduleAtFixedRate(() -> {
-            synchronized (SmartBBQ.this) {
+            synchronized (SmartBBQ.this)
+            {
                 boolean allFoodCooked = true;
                 Iterator<Food> iterator = foods.iterator();
-                while (iterator.hasNext()) {
+                while (iterator.hasNext())
+                {
                     Food food = iterator.next();
-                    if (food.getCurrentTanningPercentage() < 100) {
+                    if (food.getCurrentTanningPercentage() < 100)
+                    {
                         food.grill(temperature, timeInSeconds);
                         allFoodCooked = false;
-                    } else {
+                    }
+                    else
+                    {
                         log.info(food.getClass().getName() + " is fully cooked. Please remove it from the grill.");
                         iterator.remove();
                     }
@@ -114,7 +128,8 @@ public class SmartBBQ implements Measurable
 
                 logCurrentTanningPercentages();
 
-                if (allFoodCooked) {
+                if (allFoodCooked)
+                {
                     grillScheduler.shutdown();
                     log.info("All food items are fully cooked. Grilling session complete.");
                     turnOff();
@@ -123,22 +138,27 @@ public class SmartBBQ implements Measurable
         }, 0, INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
 
-    public void turnOff() {
+    public void turnOff()
+    {
         this.currentTemperature = 0;
 
-        if (this.scheduler != null) {
+        if (this.scheduler != null)
+        {
             this.scheduler.shutdown();
             this.scheduler = null;
         }
-        if (this.grillScheduler != null) {
+        if (this.grillScheduler != null)
+        {
             this.grillScheduler.shutdown();
             this.grillScheduler = null;
         }
         log.info("SmartBBQ™ is turned off.");
     }
 
-    private void logCurrentTanningPercentages() {
-        for (Food food : foods) {
+    private void logCurrentTanningPercentages()
+    {
+        for (Food food : foods)
+        {
             log.info(food.getClass().getName() + " current tanning percentage: " + food.getCurrentTanningPercentage() + "%");
         }
     }
