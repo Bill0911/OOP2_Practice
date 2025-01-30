@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class SmartBBQ implements Measurable
 {
     private static final Logger log = Logger.getLogger(SmartBBQ.class.getName());
-    private ScheduledExecutorService scheduler;
+    private ScheduledExecutorService preHeatScheduler;
     private ScheduledExecutorService grillScheduler;
     private static final int TEMPERATURE_INCREMENT = 5;
     private static final int INTERVAL_MS = 1000;
@@ -71,20 +71,20 @@ public class SmartBBQ implements Measurable
     public void turnOn(int targetTemperature)
     {
         this.targetTemperature = targetTemperature;
-        this.scheduler = Executors.newScheduledThreadPool(1);
+        this.preHeatScheduler = Executors.newScheduledThreadPool(1);
         this.preHeat();
     }
 
     private void preHeat()
     {
         CompletableFuture.runAsync(() -> {
-            scheduler.scheduleAtFixedRate(() ->
+            preHeatScheduler.scheduleAtFixedRate(() ->
             {
                 synchronized (SmartBBQ.this) {
                     log.info("Preheating... Current temperature: " + currentTemperature + "°C, Target temperature: " + targetTemperature + "°C");
                     if (currentTemperature >= targetTemperature)
                     {
-                        scheduler.shutdown();
+                        preHeatScheduler.shutdown();
                         log.info("SmartBBQ™ is preheated to " + targetTemperature + "°C. Ready for use!");
                     }
                     else
@@ -142,10 +142,10 @@ public class SmartBBQ implements Measurable
     {
         this.currentTemperature = 0;
 
-        if (this.scheduler != null)
+        if (this.preHeatScheduler != null)
         {
-            this.scheduler.shutdown();
-            this.scheduler = null;
+            this.preHeatScheduler.shutdown();
+            this.preHeatScheduler = null;
         }
         if (this.grillScheduler != null)
         {
